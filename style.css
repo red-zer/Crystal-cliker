@@ -1,0 +1,166 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(to right, #a0a0a0, #c0c0c0);
+    font-family: cursive;
+}
+
+h1 {
+    text-align: center;
+    margin: 10px 0;
+}
+
+.layout {
+    display: flex;
+    height: 100vh;
+}
+
+/* LEFT PANEL */
+.leftPanel {
+    width: 30%;
+    background: #111;
+    color: white;
+    padding: 20px;
+    text-align: center;
+}
+
+#gameCanvas {
+    cursor: pointer;
+    margin-left: -20px;
+}
+
+.stats {
+    font-size: 22px;
+}
+
+/* CENTER PANEL */
+.centerPanel {
+    width: 40%;
+    padding: 20px;
+    overflow-y: auto;
+    background: #d6d6d6;
+}
+
+.empireItem {
+    padding: 8px;
+    margin: 6px 0;
+    background: #e2e2e2;
+    border-radius: 6px;
+}
+
+/* RIGHT PANEL */
+.rightPanel {
+    width: 30%;
+    padding: 20px;
+    overflow-y: auto;
+    background: linear-gradient(to bottom, #d4d4d4, #bfbfbf);
+}
+
+/* BUY MODES */
+.buyModes {
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.buyModes button {
+    margin: 0 5px;
+    padding: 6px 12px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* SHOP */
+.shopRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    margin: 6px 0;
+    background: #ececec;
+    border-bottom: 2px solid #aaa;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.shopRow:hover {
+    background: #ddd;
+}
+
+.shopRow.disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+
+.shopLeft {
+    display: flex;
+    align-items: center;
+}
+
+.shopIcon {
+    font-size: 28px;
+    margin-right: 10px;
+}
+
+.shopName {
+    font-weight: bold;
+}
+
+.shopCps {
+    font-size: 12px;
+    color: #444;
+}
+
+.shopRight {
+    text-align: right;
+}
+
+.shopAmount {
+    font-size: 22px;
+    font-weight: bold;
+    color: #666;
+}
+
+.shopCost {
+    font-size: 14px;
+}
+
+/* UPGRADES */
+.upgradeItemHidden {
+    padding: 10px;
+    margin: 6px 0;
+    background: #fff8dc;
+    border: 2px solid #d4b000;
+    border-radius: 6px;
+    cursor: pointer;
+    display: none;
+}
+.upgradeItemVisible {
+    padding: 10px;
+    margin: 6px 0;
+    background: #fff8dc;
+    border: 2px solid #d4b000;
+    border-radius: 6px;
+    cursor: pointer;
+    display: "";
+}
+.sectionTitle {
+    font-weight: bold;
+    margin-top: 15px;
+    margin-bottom: 5px;
+    padding: 6px;
+    background: #999;
+    color: white;
+    text-align: center;
+}
+
+.affordable {
+    animation: glow 1s infinite alternate;
+}
+.shopIMG {
+    width: 25px;
+    height: 25px;
+}
+@keyframes glow {
+    from { box-shadow: 0 0 5px #00ff88; }
+    to { box-shadow: 0 0 15px #00ff88; }
+}
