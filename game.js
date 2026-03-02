@@ -3,6 +3,7 @@ const ctx = canvas.getContext("2d");
 
 let score = 0;
 let clickPower = 1;
+let baseClickPower = 1;
 let productionMultiplier = 1;
 let buldingsToShow = [];
 let lastUpdate = Date.now();
@@ -314,18 +315,46 @@ buildings.forEach((b, i) => {
 ======================= */
 function saveGame() {
     localStorage.setItem("crystalSave", JSON.stringify({
-        score, buildings, specialUpgrades, oneTimeUpgrades, clickPower
+        score,
+        buildings: buildings.map(b => ({ amount: b.amount })),
+        specialUpgrades: specialUpgrades.map(u => ({ bought: u.bought })),
+        oneTimeUpgrades: oneTimeUpgrades.map(u => ({ bought: u.bought }))
     }));
 }
-
 function loadGame() {
     const save = JSON.parse(localStorage.getItem("crystalSave"));
     if (!save) return;
+
     score = save.score;
-    clickPower = save.clickPower
-    save.buildings.forEach((b, i) => buildings[i].amount = b.amount);
-    save.specialUpgrades.forEach((u, i) => specialUpgrades[i].bought = u.bought);
-    save.oneTimeUpgrades.forEach((u, i) => oneTimeUpgrades[i].bought = u.bought);
+
+    // RESET do wartości startowych
+    clickPower = 1;
+    buildings.forEach(b => {
+        b.cps = b.baseCost ? b.cps = b.cps : b.cps;
+    });
+
+    // Ilości budynków
+    save.buildings.forEach((b, i) => {
+        buildings[i].amount = b.amount;
+    });
+
+    // Upgrade status
+    save.specialUpgrades.forEach((u, i) => {
+        specialUpgrades[i].bought = u.bought;
+    });
+
+    save.oneTimeUpgrades.forEach((u, i) => {
+        oneTimeUpgrades[i].bought = u.bought;
+    });
+
+    // 🔥 TERAZ zastosuj efekty tylko raz
+    oneTimeUpgrades.forEach(u => {
+        if (u.bought) u.effect();
+    });
+
+    specialUpgrades.forEach(u => {
+        if (u.bought) u.effect();
+    });
 }
 
 document.addEventListener("keydown", function (e) {
