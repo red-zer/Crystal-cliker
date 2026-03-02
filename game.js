@@ -4,9 +4,10 @@ const ctx = canvas.getContext("2d");
 let score = 0;
 let clickPower = 1;
 let productionMultiplier = 1;
-const buldingsToBuy = [];
+let buldingsToShow = [];
 let lastUpdate = Date.now();
 let buyAmount = 1;
+let buildingCount = 0;
 
 let activeDrill = 0;
 let drillProgress = 0;
@@ -277,21 +278,34 @@ function updateUI() {
     }
 
     // BUILDINGS
-    const bTitle = document.createElement("div");
-    bTitle.className = "sectionTitle";
-    bTitle.innerText = "BUILDINGS";
-    shop.appendChild(bTitle);
+// BUILDINGS
+const bTitle = document.createElement("div");
+bTitle.className = "sectionTitle";
+bTitle.innerText = "BUILDINGS";
+shop.appendChild(bTitle);
 
-    buildings.forEach((b, i) => {
-        const cost = getCost(b);
-        const div = document.createElement("div");
-        div.className = "shopRow";
-        if (score >= cost) div.classList.add("affordable");
-        div.innerHTML = `<div><img class="shopIMG" src="${b.assets}"> ${b.name}</div><div>${b.amount}</div><div>${formatNumber(cost)}</div>`;
-        if (score >= cost) div.onclick = () => buyBuilding(i);
-        shop.appendChild(div);
-    });
+buildings.forEach((b, i) => {
+    const cost = getCost(b);
+    const elem = document.createElement("div");
+    elem.className = "shopRow";
 
+    // Budynek jest już kupiony lub osiągalny -> pokazujemy
+    if (b.amount > 0 || score >= cost * 0.9 || buldingsToShow.includes(i)) {
+        elem.style.display = "flex"; // pokaż
+        if (!buldingsToShow.includes(i)) buldingsToShow.push(i);
+
+        // Podświetlenie tylko jeśli możesz teraz kupić
+        if (score >= cost) elem.classList.add("affordable");
+    } else {
+        elem.style.display = "none"; // nadal ukryty
+    }
+
+    elem.id = `building${i}`;
+    elem.innerHTML = `<div><img class="shopIMG" src="${b.assets}"> ${b.name}</div><div>${b.amount}</div><div>${formatNumber(cost)}</div>`;
+
+    if (score >= cost) elem.onclick = () => buyBuilding(i);
+    shop.appendChild(elem);
+});
     saveGame();
 }
 
@@ -381,37 +395,27 @@ function drawOrbitingDrills() {
     const baseRotationSpeed = 0.01;
 
     while (remaining > 0) {
-
         const ringCapacity = baseCapacity + ring * 10;
         const drillsInRing = Math.min(remaining, ringCapacity);
         const radius = crystal.size + 40 + ring * radiusStep;
-
         if (
             crystal.x - radius < 0 ||
             crystal.x + radius > canvas.width ||
             crystal.y - radius < 0 ||
             crystal.y + radius > canvas.height
         ) break;
-
         if (!ringStates[ring]) {
             ringStates[ring] = { progress: 0, active: 0, angle: 0 };
         }
-
         let state = ringStates[ring];
-
-        // 🔥 KAŻDY RING KRĘCI SIĘ SZYBCIEJ
         const rotationSpeed = baseRotationSpeed * (1 + ring * 0.3);
         state.angle += rotationSpeed;
-
         state.progress += drillSpeed;
-
         if (state.progress >= 1) {
             state.progress = 0;
             state.active = (state.active + 1) % drillsInRing;
         }
-
         for (let i = 0; i < drillsInRing; i++) {
-
             const baseAngle = state.angle + (i * (Math.PI * 2 / drillsInRing));
             let x = crystal.x + Math.cos(baseAngle) * radius;
             let y = crystal.y + Math.sin(baseAngle) * radius;
@@ -431,35 +435,28 @@ function drawOrbitingDrills() {
                     });
                 }
             }
-
             const dx = crystal.x - x;
             const dy = crystal.y - y;
             let rotation = Math.atan2(dy, dx) - Math.PI / 4;
-
             ctx.save();
             ctx.translate(x, y);
             ctx.rotate(rotation);
             ctx.drawImage(buildings[0].show, -12.5, -12.5, 25, 25);
             ctx.restore();
         }
-
         remaining -= drillsInRing;
         ring++;
     }
-
     // Sparks
     for (let i = sparks.length - 1; i >= 0; i--) {
         const s = sparks[i];
-
         ctx.fillStyle = `rgba(255,200,50,${s.life / 40})`;
         ctx.beginPath();
         ctx.arc(s.x, s.y, 2, 0, Math.PI * 2);
         ctx.fill();
-
         s.x += s.dx;
         s.y += s.dy;
         s.life -= 1;
-
         if (s.life <= 0) sparks.splice(i, 1);
     }
 }
@@ -497,11 +494,7 @@ canvas.addEventListener("click", (e) => {
 ======================= */
 function gameLoop() {
     const now = Date.now();
-    const delta = (now - lastUpdate) / 1000;
     lastUpdate = now;
-
-    score += totalCPS() * delta;
-
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawCrystal();
     drawOrbitingDrills();
@@ -509,6 +502,11 @@ function gameLoop() {
     requestAnimationFrame(gameLoop);
     showOneTimeUpgrades()
 }
+setInterval(() => {
+    score += totalCPS();
+    updateUI()
+}, 1000);
+
 /* =======================
    SPECIAL UPGRADES UI
 ======================= */

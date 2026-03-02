@@ -134,6 +134,7 @@ h1 {
     cursor: pointer;
     display: none;
 }
+
 .upgradeItemVisible {
     padding: 10px;
     margin: 6px 0;
@@ -143,6 +144,7 @@ h1 {
     cursor: pointer;
     display: "";
 }
+
 .sectionTitle {
     font-weight: bold;
     margin-top: 15px;
@@ -156,11 +158,18 @@ h1 {
 .affordable {
     animation: glow 1s infinite alternate;
 }
+
 .shopIMG {
     width: 25px;
     height: 25px;
 }
+
 @keyframes glow {
-    from { box-shadow: 0 0 5px #00ff88; }
-    to { box-shadow: 0 0 15px #00ff88; }
+    from {
+        box-shadow: 0 0 5px #00ff88;
+    }
+
+    to {
+        box-shadow: 0 0 15px #00ff88;
+    }
 }
