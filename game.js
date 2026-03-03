@@ -1,6 +1,7 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 const infoB = document.querySelector("#infoB")
+const empireView = document.querySelector("#empireView")
 
 let score = 0;
 let clickPower = 1;
@@ -35,10 +36,10 @@ const crystal = {
    BUILDINGS
 ======================= */
 const buildings = [
-    { name: "Nano Drill", baseCost: 15, amount: 0, cps: 0.1, assets: "/assets/towers/nanoDrill.png", show: new Image() },
+    { name: "Nano Drill", baseCost: 15, amount: 0, cps: 0.1, assets: "/assets/towers/nanoDrill2.png", show: new Image() },
     { name: "Mining Drone", baseCost: 100, amount: 0, cps: 1, assets: "/assets/towers/miningDrone.png" },
     { name: "Quantum Extractor", baseCost: 1100, amount: 0, cps: 8, assets: "/assets/towers/quantumExtractor.jpg" },
-    { name: "Crystel cave", baseCost: 12000, amount: 0, cps: 20, assets: "/assets/towers/crystalCave.jpg" },
+    { name: "Crystel cave", baseCost: 12000, amount: 0, cps: 40, assets: "/assets/towers/crystalCave.jpg" },
     { name: "Plasma Harvester", baseCost: 75000, amount: 0, cps: 75, assets: "/assets/towers/plasmaHarvester.png" },
     { name: "Asteroid Miner", baseCost: 250000, amount: 0, cps: 220, assets: "/assets/towers/asteroidMiner.png" },
     { name: "Crystal Reactor", baseCost: 1000000, amount: 0, cps: 850, assets: "/assets/towers/crystalReactor.png" },
@@ -87,7 +88,6 @@ const specialUpgrades = [
     { name: "Reactor Singularity Chain", desc: "Crystal Reactor production x7", cost: 5000000000, buildingIndex: 6, required: 200, bought: false, effect: () => buildings[6].cps *= 7 },
     { name: "Void Energy Compression", desc: "Void Extractor production x3", cost: 250000000, buildingIndex: 7, required: 50, bought: false, effect: () => buildings[7].cps *= 3 },
     { name: "Void Collapse Reactor", desc: "Void Extractor production x9", cost: 25000000000, buildingIndex: 7, required: 250, bought: false, effect: () => buildings[7].cps *= 9 },
-    // ===== SYNERGIE =====
     { name: "Drill-Drone Link", desc: "Each Nano Drill boosts Mining Drones by 1%", cost: 1000000, buildingIndex: 0, required: 100, bought: false, effect: () => buildings[1].cps *= (1 + buildings[0].amount * 0.01) },
     { name: "Drone-Quantum Interface", desc: "Each Mining Drone boosts Quantum Extractors by 0.5%", cost: 5000000, buildingIndex: 1, required: 100, bought: false, effect: () => buildings[2].cps *= (1 + buildings[1].amount * 0.005) },
     { name: "Crystal Resonance Network", desc: "Each Crystal Cave boosts all buildings by 0.3%", cost: 50000000, buildingIndex: 3, required: 150, bought: false, effect: () => buildings.forEach(b => b.cps *= (1 + buildings[3].amount * 0.003)) },
@@ -117,31 +117,8 @@ const oneTimeUpgrades = [
     // ===== Mid Game =====
     { name: "Plasma Compression", desc: "Plasma Harvesters produce x2", cost: 250000, bought: false, effect: () => buildings[4].cps *= 2 },
     { name: "Asteroid Scanning Tech", desc: "Asteroid Miners produce x2", cost: 750000, bought: false, effect: () => buildings[5].cps *= 2 },
-    { name: "Reactor Stabilization", desc: "Crystal Reactors produce x2", cost: 2000000, bought: false, effect: () => buildings[6].cps *= 2 },
-    { name: "Void Amplification", desc: "Void Extractors produce x2", cost: 10000000, bought: false, effect: () => buildings[7].cps *= 2 },
-
-    // ===== Global Boosts =====
-    { name: "Empire Infrastructure", desc: "All buildings produce x1.25", cost: 5000000, bought: false, effect: () => buildings.forEach(b => b.cps *= 1.25) },
-    { name: "Hyper Efficiency", desc: "All production x1.5", cost: 25000000, bought: false, effect: () => buildings.forEach(b => b.cps *= 1.5) },
-    { name: "Galactic Supply Chain", desc: "All production +100%", cost: 100000000, bought: false, effect: () => buildings.forEach(b => b.cps *= 2) },
-
-    // ===== Scaling Upgrades =====
-    {
-        name: "Mass Production Protocol", desc: "Gain +1% CPS per building owned", cost: 5000000, bought: false, effect: () => {
-            const total = buildings.reduce((sum, b) => sum + b.amount, 0);
-            buildings.forEach(b => b.cps *= (1 + total * 0.01));
-        }
-    },
-
-    {
-        name: "Crystal Synergy", desc: "Each Nano Drill boosts all buildings by 0.5%", cost: 3000000, bought: false, effect: () => {
-            const boost = buildings[0].amount * 0.005;
-            buildings.forEach(b => b.cps *= (1 + boost));
-        }
-    },
-
-    // ===== Click + Passive Combo =====
     { name: "Overcharged Clicks", desc: "Click power x3", cost: 1000000, bought: false, effect: () => clickPower *= 3 },
+    { name: "Reactor Stabilization", desc: "Crystal Reactors produce x2", cost: 2000000, bought: false, effect: () => buildings[6].cps *= 2 },
     {
         name: "Automated Clicking System", desc: "Gain 10% of click power per second", cost: 2000000, bought: false, effect: () => {
             setInterval(() => {
@@ -149,6 +126,27 @@ const oneTimeUpgrades = [
             }, 1000);
         }
     },
+    {
+        name: "Crystal Synergy", desc: "Each Nano Drill boosts all buildings by 0.5%", cost: 3000000, bought: false, effect: () => {
+            const boost = buildings[0].amount * 0.005;
+            buildings.forEach(b => b.cps *= (1 + boost));
+        }
+    },
+    { name: "Empire Infrastructure", desc: "All buildings produce x1.25", cost: 5000000, bought: false, effect: () => buildings.forEach(b => b.cps *= 1.25) },
+    {
+        name: "Mass Production Protocol", desc: "Gain +1% CPS per building owned", cost: 5000000, bought: false, effect: () => {
+            const total = buildings.reduce((sum, b) => sum + b.amount, 0);
+            buildings.forEach(b => b.cps *= (1 + total * 0.01));
+        }
+    },
+    { name: "Void Amplification", desc: "Void Extractors produce x2", cost: 10000000, bought: false, effect: () => buildings[7].cps *= 2 },
+    { name: "Hyper Efficiency", desc: "All production x1.5", cost: 25000000, bought: false, effect: () => buildings.forEach(b => b.cps *= 1.5) },
+    { name: "Galactic Supply Chain", desc: "All production +100%", cost: 100000000, bought: false, effect: () => buildings.forEach(b => b.cps *= 2) },
+
+
+
+
+    // ===== Click + Passive Combo =====
 
     // ===== Late Game =====
     { name: "Dark Matter Infusion", desc: "Dark Matter Synthesizers produce x2", cost: 500000000, bought: false, effect: () => buildings[9].cps *= 2 },
@@ -199,6 +197,7 @@ function buyBuilding(i) {
         } else break;
     }
     if (bought > 0) updateUI();
+    viewUbdateUI()
 }
 
 /* =======================
@@ -274,7 +273,6 @@ function updateUI() {
     }
 
     // BUILDINGS
-    // BUILDINGS
     const bTitle = document.createElement("div");
     bTitle.className = "sectionTitle";
     bTitle.innerText = "BUILDINGS";
@@ -283,16 +281,12 @@ function updateUI() {
         const cost = getCost(b);
         const elem = document.createElement("div");
         elem.className = "shopRow";
-
-        // Budynek jest już kupiony lub osiągalny -> pokazujemy
         if (b.amount > 0 || score >= cost * 0.5 || buldingsToShow.includes(i)) {
-            elem.style.display = "flex"; // pokaż
+            elem.style.display = "flex";
             if (!buldingsToShow.includes(i)) buldingsToShow.push(i);
-
-            // Podświetlenie tylko jeśli możesz teraz kupić
             if (score >= cost) elem.classList.add("affordable");
         } else {
-            elem.style.display = "none"; // nadal ukryty
+            elem.style.display = "none";
         }
 
         elem.id = `building${i}`;
@@ -314,6 +308,33 @@ function updateUI() {
         shop.appendChild(elem);
     });
     saveGame();
+}
+function viewUbdateUI() {
+    for (let i = 0; i < buildings.length; i++) {
+        if (buildings[i].amount > 0) {
+            const displayElem = document.getElementById(`${buildings[i].name}ID`);
+            if (displayElem != null) {
+                displayElem.style.display = "flex";
+                displayElem.innerHTML = ""
+                for (let j = 0; j < buildings[i].amount; j++) {
+                    displayElem.innerHTML = `${displayElem.innerHTML} <img src="${buildings[i].assets}" class="viewIMGShow">`
+                }
+            }
+        }
+    }
+}
+/* =======================
+    EMPIRE VIEW
+======================= */
+
+function empireVDG() {
+    for (let i = 0; i < buildings.length; i++) {
+        const div = document.createElement("div");
+        div.id = `${buildings[i].name}ID`
+        div.className = "empireViewClass"
+        div.style.top = `calc(${20}px + ${10 * i}%)`
+        empireView.appendChild(div)
+    }
 }
 
 /* =======================
@@ -427,7 +448,7 @@ function drawCrystal() {
     ctx.fillStyle = "rgba(255,255,255,0.4)";
     ctx.fill();
 
-    
+
     ctx.restore();
     const gradient = ctx.createLinearGradient(0, -crystal.size, 0, crystal.size);
     gradient.addColorStop(0, "#a0f0ff");
@@ -588,6 +609,31 @@ setInterval(() => {
     score += totalCPS();
     updateUI()
 }, 1000);
+setInterval(() => {
+    for (let i = 0; i < buildings.length; i++) {
+        if (buildings[i].amount > 0) {
+            const displayElem = document.getElementById(`${buildings[i].name}ID`);
+            if (displayElem != null) {
+                displayElem.style.display = "flex";
+                displayElem.innerHTML = ""
+                for (let j = 0; j < buildings[i].amount; j++) {
+                    displayElem.innerHTML = `${displayElem.innerHTML} <img src="${buildings[i].assets}" class="viewIMGShow">`
+                }
+            }
+        }
+    }
+}, 2000);
+
+/* =======================
+   SETUP
+======================= */
+
+function setup() {
+    for (let i = 0; i < buildings.length; i++) {
+        const displayElem = document.getElementById(`${buildings[i].name}ID`);
+        displayElem.style.display = "none"
+    }
+}
 
 /* =======================
    SPECIAL UPGRADES UI
@@ -642,3 +688,5 @@ function updateSpecialUpgradesUI(shop) {
 loadGame();
 updateUI();
 gameLoop();
+empireVDG();
+setup();
