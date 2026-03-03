@@ -1,5 +1,6 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
+const infoB = document.querySelector("#infoB")
 
 let score = 0;
 let clickPower = 1;
@@ -9,6 +10,7 @@ let buldingsToShow = [];
 let lastUpdate = Date.now();
 let buyAmount = 1;
 let buildingCount = 0;
+let mouseY = 0
 
 let activeDrill = 0;
 let drillProgress = 0;
@@ -63,35 +65,28 @@ buildings[0].show.src = "/assets/towers/nanoDrill.png";
    SPECIAL UPGRADES
 ======================= */
 const specialUpgrades = [
-
     { name: "Drill Overclock", desc: "Nano Drill production x2", cost: 500, buildingIndex: 0, required: 10, bought: false, effect: () => buildings[0].cps *= 2 },
     { name: "Nano Drill Efficiency", desc: "Nano Drill production x2", cost: 5000, buildingIndex: 0, required: 25, bought: false, effect: () => buildings[0].cps *= 2 },
     { name: "Industrial Drill Network", desc: "Nano Drill production x3", cost: 25000, buildingIndex: 0, required: 50, bought: false, effect: () => buildings[0].cps *= 3 },
     { name: "Planetary Drill Grid", desc: "Nano Drill production x5", cost: 5000000, buildingIndex: 0, required: 100, bought: false, effect: () => buildings[0].cps *= 5 },
     { name: "Subatomic Drill Collapse", desc: "Nano Drill production x10", cost: 500000000, buildingIndex: 0, required: 250, bought: false, effect: () => buildings[0].cps *= 10 },
-
     { name: "Drone AI Matrix", desc: "Mining Drone production x2", cost: 2000, buildingIndex: 1, required: 10, bought: false, effect: () => buildings[1].cps *= 2 },
     { name: "Autonomous Drone Fleet", desc: "Mining Drone production x2", cost: 10000, buildingIndex: 1, required: 25, bought: false, effect: () => buildings[1].cps *= 2 },
     { name: "Drone Swarm Protocol", desc: "Mining Drone production x3", cost: 75000, buildingIndex: 1, required: 50, bought: false, effect: () => buildings[1].cps *= 3 },
     { name: "Interplanetary Drone Network", desc: "Mining Drone production x5", cost: 15000000, buildingIndex: 1, required: 100, bought: false, effect: () => buildings[1].cps *= 5 },
     { name: "Quantum Drone Singularity", desc: "Mining Drone production x10", cost: 1500000000, buildingIndex: 1, required: 250, bought: false, effect: () => buildings[1].cps *= 10 },
-
     { name: "Quantum Stabilizers", desc: "Quantum Extractor production x2", cost: 150000, buildingIndex: 2, required: 25, bought: false, effect: () => buildings[2].cps *= 2 },
     { name: "Quantum Singularity Core", desc: "Quantum Extractor production x3", cost: 750000, buildingIndex: 2, required: 75, bought: false, effect: () => buildings[2].cps *= 3 },
     { name: "Dimensional Quantum Collapse", desc: "Quantum Extractor production x6", cost: 50000000, buildingIndex: 2, required: 150, bought: false, effect: () => buildings[2].cps *= 6 },
     { name: "Infinite Quantum Loop", desc: "Quantum Extractor production x12", cost: 5000000000, buildingIndex: 2, required: 300, bought: false, effect: () => buildings[2].cps *= 12 },
-
     { name: "Deep Crystal Expansion", desc: "Crystal Cave production x2", cost: 500000, buildingIndex: 3, required: 25, bought: false, effect: () => buildings[3].cps *= 2 },
     { name: "Ancient Crystal Awakening", desc: "Crystal Cave production x4", cost: 2500000, buildingIndex: 3, required: 75, bought: false, effect: () => buildings[3].cps *= 4 },
     { name: "Crystal Core Resonance", desc: "Crystal Cave production x8", cost: 250000000, buildingIndex: 3, required: 200, bought: false, effect: () => buildings[3].cps *= 8 },
     { name: "Primordial Crystal God", desc: "Crystal Cave production x15", cost: 25000000000, buildingIndex: 3, required: 400, bought: false, effect: () => buildings[3].cps *= 15 },
-
     { name: "Reactor Core Overdrive", desc: "Crystal Reactor production x3", cost: 50000000, buildingIndex: 6, required: 50, bought: false, effect: () => buildings[6].cps *= 3 },
     { name: "Reactor Singularity Chain", desc: "Crystal Reactor production x7", cost: 5000000000, buildingIndex: 6, required: 200, bought: false, effect: () => buildings[6].cps *= 7 },
-
     { name: "Void Energy Compression", desc: "Void Extractor production x3", cost: 250000000, buildingIndex: 7, required: 50, bought: false, effect: () => buildings[7].cps *= 3 },
     { name: "Void Collapse Reactor", desc: "Void Extractor production x9", cost: 25000000000, buildingIndex: 7, required: 250, bought: false, effect: () => buildings[7].cps *= 9 },
-
     // ===== SYNERGIE =====
     { name: "Drill-Drone Link", desc: "Each Nano Drill boosts Mining Drones by 1%", cost: 1000000, buildingIndex: 0, required: 100, bought: false, effect: () => buildings[1].cps *= (1 + buildings[0].amount * 0.01) },
     { name: "Drone-Quantum Interface", desc: "Each Mining Drone boosts Quantum Extractors by 0.5%", cost: 5000000, buildingIndex: 1, required: 100, bought: false, effect: () => buildings[2].cps *= (1 + buildings[1].amount * 0.005) },
@@ -103,14 +98,14 @@ const specialUpgrades = [
             buildings.forEach(b => b.cps *= (1 + total * 0.002));
         }
     }
-
 ];
 
 /* =======================
    ONE-TIME UPGRADES
 ======================= */
 const oneTimeUpgrades = [
-    { name: "Reinforced Pickaxe", desc: "Click power x2", cost: 500, bought: false, effect: () => clickPower *= 2 },
+    { name: "Reinforced Pickaxe", desc: "Click power x2", cost: 100, bought: false, effect: () => clickPower *= 2 },
+    { name: "Better Pickaxe", desc: "Click power x2", cost: 500, bought: false, effect: () => clickPower *= 2 },
     { name: "Advanced Drill Protocols", desc: "All Nano Drills produce x2", cost: 2000, bought: false, effect: () => buildings[0].cps *= 2 },
     { name: "Drone AI Upgrade", desc: "All Mining Drones produce x2", cost: 5000, bought: false, effect: () => buildings[1].cps *= 2 },
 
@@ -279,34 +274,45 @@ function updateUI() {
     }
 
     // BUILDINGS
-// BUILDINGS
-const bTitle = document.createElement("div");
-bTitle.className = "sectionTitle";
-bTitle.innerText = "BUILDINGS";
-shop.appendChild(bTitle);
+    // BUILDINGS
+    const bTitle = document.createElement("div");
+    bTitle.className = "sectionTitle";
+    bTitle.innerText = "BUILDINGS";
+    shop.appendChild(bTitle);
+    buildings.forEach((b, i) => {
+        const cost = getCost(b);
+        const elem = document.createElement("div");
+        elem.className = "shopRow";
 
-buildings.forEach((b, i) => {
-    const cost = getCost(b);
-    const elem = document.createElement("div");
-    elem.className = "shopRow";
+        // Budynek jest już kupiony lub osiągalny -> pokazujemy
+        if (b.amount > 0 || score >= cost * 0.5 || buldingsToShow.includes(i)) {
+            elem.style.display = "flex"; // pokaż
+            if (!buldingsToShow.includes(i)) buldingsToShow.push(i);
 
-    // Budynek jest już kupiony lub osiągalny -> pokazujemy
-    if (b.amount > 0 || score >= cost * 0.9 || buldingsToShow.includes(i)) {
-        elem.style.display = "flex"; // pokaż
-        if (!buldingsToShow.includes(i)) buldingsToShow.push(i);
+            // Podświetlenie tylko jeśli możesz teraz kupić
+            if (score >= cost) elem.classList.add("affordable");
+        } else {
+            elem.style.display = "none"; // nadal ukryty
+        }
 
-        // Podświetlenie tylko jeśli możesz teraz kupić
-        if (score >= cost) elem.classList.add("affordable");
-    } else {
-        elem.style.display = "none"; // nadal ukryty
-    }
-
-    elem.id = `building${i}`;
-    elem.innerHTML = `<div><img class="shopIMG" src="${b.assets}"> ${b.name}</div><div>${b.amount}</div><div>${formatNumber(cost)}</div>`;
-
-    if (score >= cost) elem.onclick = () => buyBuilding(i);
-    shop.appendChild(elem);
-});
+        elem.id = `building${i}`;
+        elem.innerHTML = `<div><img class="shopIMG" src="${b.assets}"> ${b.name}</div><div>${b.amount}</div><div>${formatNumber(cost)}</div>`;
+        if (score >= cost) elem.onclick = () => buyBuilding(i);
+        elem.addEventListener("mouseenter", () => {
+            infoB.style.visibility = "visible"
+            infoB.innerHTML =
+                `
+                <img src="${buildings[i].assets}" class="infoB-IMG">
+                <p class="infoBP" id="infoBPN">${buildings[i].name}</p><br>
+                <p class="infoBP" id="infoBPC">Each ${buildings[i].name} generate ${buildings[i].cps}</p>
+                <p class="infoBP" id="infoBPP">${buildings[i].amount} ${buildings[i].name} producing ${Math.round((buildings[i].amount * buildings[i].cps) * 10) / 10}</p>
+                `
+        })
+        elem.addEventListener("mouseleave", () => {
+            infoB.style.visibility = "hidden"
+        })
+        shop.appendChild(elem);
+    });
     saveGame();
 }
 
@@ -375,14 +381,54 @@ function drawCrystal() {
     ctx.shadowBlur = 20;
     ctx.shadowColor = "#00eaff";
 
-    ctx.beginPath();
-    ctx.moveTo(0, -crystal.size);
-    ctx.lineTo(crystal.size * 0.6, -crystal.size * 0.3);
-    ctx.lineTo(crystal.size * 0.4, crystal.size * 0.8);
-    ctx.lineTo(-crystal.size * 0.4, crystal.size * 0.8);
-    ctx.lineTo(-crystal.size * 0.6, -crystal.size * 0.3);
-    ctx.closePath();
+    const s = crystal.size;
 
+    ctx.save();
+
+    //DIAMOND DRAW
+    ctx.beginPath();
+    ctx.moveTo(0, -s);
+    ctx.lineTo(s * 0.6, -s * 0.3);
+    ctx.lineTo(s * 0.4, s * 0.8);
+    ctx.lineTo(0, s);
+    ctx.lineTo(-s * 0.4, s * 0.8);
+    ctx.lineTo(-s * 0.6, -s * 0.3);
+    ctx.closePath();
+    const crystalFill = ctx.createLinearGradient(0, -s, 0, s);
+    crystalFill.addColorStop(0, "#e0fbff");
+    crystalFill.addColorStop(0.4, "#64dfdf");
+    crystalFill.addColorStop(1, "#3a0ca3");
+    ctx.fillStyle = crystalFill;
+    ctx.fill();
+    ctx.strokeStyle = "rgba(255,255,255,0.6)";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.strokeStyle = "rgba(255,255,255,0.35)";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(0, -s);
+    ctx.lineTo(0, s);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(0, -s);
+    ctx.lineTo(s * 0.4, s * 0.8);
+    ctx.moveTo(0, -s);
+    ctx.lineTo(-s * 0.4, s * 0.8);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(-s * 0.5, -s * 0.3);
+    ctx.lineTo(s * 0.5, -s * 0.3);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(-s * 0.15, -s * 0.6);
+    ctx.lineTo(s * 0.15, -s * 0.6);
+    ctx.lineTo(0, -s * 0.8);
+    ctx.closePath();
+    ctx.fillStyle = "rgba(255,255,255,0.4)";
+    ctx.fill();
+
+    
+    ctx.restore();
     const gradient = ctx.createLinearGradient(0, -crystal.size, 0, crystal.size);
     gradient.addColorStop(0, "#a0f0ff");
     gradient.addColorStop(1, "#0066aa");
@@ -396,6 +442,13 @@ function drawCrystal() {
     ctx.restore();
 }
 
+/* =======================
+   MOUSE X, Y
+======================= */
+document.addEventListener("mousemove", function (event) {
+    mouseY = event.clientY
+    infoB.style.top = `${mouseY}px`
+});
 /* =======================
    ORBITING NANOS
 ======================= */

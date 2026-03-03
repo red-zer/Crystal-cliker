@@ -163,6 +163,35 @@ h1 {
     width: 25px;
     height: 25px;
 }
+#infoB {
+    position: absolute;
+    width: 300px;
+    height: 100px;
+    background-color: #ececec;
+    visibility: hidden;
+    right: calc(30% + 5px);
+}
+.infoB-IMG {
+    width: 25px;
+    height: 25px;
+    background-color: #c0c0c0;
+}
+.infoBP {
+    position: absolute;
+    font-size: small;
+    left: 2px;
+}
+#infoBPC {
+    top: 15px;
+}
+#infoBPP {
+    top: 32px;
+}
+#infoBPN {
+    font-size: medium;
+    left: 30px;
+    top: -14px;
+}
 
 @keyframes glow {
     from {
