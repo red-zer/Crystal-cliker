@@ -40,13 +40,13 @@ const buildings = [
     { name: "Mining Drone", baseCost: 100, amount: 0, cps: 1, assets: "/assets/towers/miningDrone.png" },
     { name: "Quantum Extractor", baseCost: 1100, amount: 0, cps: 8, assets: "/assets/towers/quantumExtractor.jpg" },
     { name: "Crystel cave", baseCost: 12000, amount: 0, cps: 40, assets: "/assets/towers/crystalCave.jpg" },
-    { name: "Plasma Harvester", baseCost: 75000, amount: 0, cps: 75, assets: "/assets/towers/plasmaHarvester.png" },
-    { name: "Asteroid Miner", baseCost: 250000, amount: 0, cps: 220, assets: "/assets/towers/asteroidMiner.png" },
-    { name: "Crystal Reactor", baseCost: 1000000, amount: 0, cps: 850, assets: "/assets/towers/crystalReactor.png" },
-    { name: "Void Extractor", baseCost: 5000000, amount: 0, cps: 3200, assets: "/assets/towers/voidExtractor.png" },
-    { name: "Galactic Refinery", baseCost: 20000000, amount: 0, cps: 12000, assets: "/assets/towers/galacticRefinery.png" },
-    { name: "Dark Matter Synthesizer", baseCost: 100000000, amount: 0, cps: 45000, assets: "/assets/towers/darkMatterSynthesizer.png" },
-    { name: "Stellar Core Tapper", baseCost: 750000000, amount: 0, cps: 150000, assets: "/assets/towers/stellarCoreTapper.png" },
+    { name: "Plasma Harvester", baseCost: 75000, amount: 0, cps: 100, assets: "/assets/towers/plasmaHarvester.png" },
+    { name: "Asteroid Miner", baseCost: 250000, amount: 0, cps: 300, assets: "/assets/towers/asteroidMiner.png" },
+    { name: "Crystal Reactor", baseCost: 1000000, amount: 0, cps: 1000, assets: "/assets/towers/crystalReactor.png" },
+    { name: "Void Extractor", baseCost: 5000000, amount: 0, cps: 5000, assets: "/assets/towers/voidExtractor.png" },
+    { name: "Galactic Refinery", baseCost: 20000000, amount: 0, cps: 17000, assets: "/assets/towers/galacticRefinery.png" },
+    { name: "Dark Matter Synthesizer", baseCost: 100000000, amount: 0, cps: 65000, assets: "/assets/towers/darkMatterSynthesizer.png" },
+    { name: "Stellar Core Tapper", baseCost: 800000000, amount: 0, cps: 250000, assets: "/assets/towers/stellarCoreTapper.png" },
     { name: "Interdimensional Forge", baseCost: 5000000000, amount: 0, cps: 600000, assets: "/assets/towers/interdimensionalForge.jpg" },
     { name: "Crystal Singularity", baseCost: 25000000000, amount: 0, cps: 2500000, assets: "/assets/towers/crystalSingularity.png" },
     { name: "Empire Nexus", baseCost: 100000000000, amount: 0, cps: 10000000, assets: "/assets/towers/empireNexus.jpg" }
@@ -606,9 +606,9 @@ function gameLoop() {
     showOneTimeUpgrades()
 }
 setInterval(() => {
-    score += totalCPS();
+    score += totalCPS() / 3;
     updateUI()
-}, 1000);
+}, 1000 / 3);
 setInterval(() => {
     for (let i = 0; i < buildings.length; i++) {
         if (buildings[i].amount > 0) {
@@ -675,9 +675,7 @@ function updateSpecialUpgradesUI(shop) {
                 </div>
                 <div style="font-weight:bold; color:#222;">${formatNumber(u.cost)}</div>
             `;
-
             if (score >= u.cost) div.onclick = () => buySpecialUpgrade(u);
-
             shop.appendChild(div);
         });
     }
